@@ -183,3 +183,26 @@ allow group data_analysts, developers to use cloud-shell in tenancy
 - 좌측 하단의 "Next" 버튼을 클릭 후, "Create" 버튼을 클릭
 ![CreatedVCN](./images/CreatedVCN.png)
 ![CreatedVCN_Result](./images/CreatedVCN_Result.png)
+## OKE (Oracle Kubernetes Engine)
+- 준비사항: ``demo`` 아래에 새로운 oke를 위한 ``demo_oke`` compartement 생성
+![demo_oke_compartment](./images/demo_oke_compartment.png)
+### Cluster 생성
+- Step 01: 좌측 메뉴 > Developer Service > Containers & Artifacts > Kubernetes Clusters
+- Step 02: ``demo_oke`` compartment 선택 > ``Create Cluster`` > ``Quick Create`` > ``Launch Workflow``
+![CreaterCluster](./images/CreaterCluster.png)
+- Step 03: 상세 설정
+![QuickCreateCluster_1](./images/QuickCreateCluster_1.png)
+![QuickCreateCluster_2](./images/QuickCreateCluster_2.png)
+- Step 04: SSH Key Generation & 저장, ``Next`` 버튼 클릭.
+![QuickCreateCluster_3](./images/QuickCreateCluster_3.png)
+![QuickCreateCluster_4](./images/QuickCreateCluster_4.png)
+- Step 05: 상세 조건 확인 및 생성
+![QuickCreateCluster_5](./images/QuickCreateCluster_5.png)
+![QuickCreateCluster_6](./images/QuickCreateCluster_6.png)
+
+- Step 06: 생성된 Cluster의 상세 정보 확인 (VCN, NodePool)
+![Created_Cluster_1](./images/Created_Cluster_1.png)
+![Created_Cluster_2](./images/Created_Cluster_2.png)
+![Created_Cluster_3](./images/Created_Cluster_3.png)
+
+- 부가적인 설정: **Bastion node를 생성하는 방법은 ./doc/bastion-hosts.pdf를 참조**
