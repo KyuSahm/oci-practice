@@ -1289,4 +1289,95 @@ job.batch/ingress-nginx-admission-patch    1/1           7s         117m
 ### 서비스 확인
 - 외부에서 접속하여 서비스가 제대로 제공되는지 확인
 ![marvel_home](./images/marvel_home.png)
-![payment](./images/payment.png)    
+![payment](./images/payment.png)
+
+## DNS Zone Management
+- Highlyscalable, global **anycast Domain Name System(DNS)** network that assures high site availability and low latency
+### Anycast 기법이란?
+- 네트워크 용어
+- 우리가 보통 알고 있는 IP주소는 **Unicast IP**이며, 고유한 IP주소를 가짐
+- Anycast IP는 서로 다른 곳, 서로 다른 호스트끼리 동일한 IP주소를 가질 수 있는 개념
+  - 이때의 문제점은 가끔 사무실에 출근하면 누군가 내 IP를 써서 IP충돌나듯이 IP가 충돌남
+  - 이 충돌된 IP들의 회피 방법은 BGP와 같은 라우팅 프로토콜에 의해서 해결
+  - 라우팅 프로토콜에 의해 이 충돌난 IP에 대해서 가장 최적의 경로의 IP를 가진 서버를 1개 선택해서 라우팅 해줌
+  - 사무실과 같은 L2 에서는 IP가 충돌나면 사용이 불가능하지만, 라우터 같은 L3 에서는 충돌나도 가능
+- 같은 IP를 각 라우터들이 Announce하며 가장 가까운 곳으로 판된되는 쪽으로 사용
+![Anycast_1](./images/Anycast_1.png)  
+### Anycast DNS란?
+- DNS 서버를 지역별 분산 구성하여 DNS 질의를 요청한 클라이언트와 가장 근접한 DNS 서버가 처리하도록 하여 응답속도와 안정성을 향상 시킨 DNS
+- 항상 네트워크 경로상 가장 가까운 DNS 서버가 응답
+- 가장 가까운 DNS가 장애가 발생되면, 라우터에서 어나운스가 되지 않아 자동으로 빠지며 그 다음 가까이 위치에 있는 DNS가 대신 처리
+![Anycast_DNS](./images/Anycast_DNS.png)
+### Anycast DNS 도입배경
+- Anycast 가 도입된 이유는 2002년 10월 root DNS DDoS공격으로 전 세계 13개 root DNS중 8개가 다운, 2003년 1.25 인터넷 대란때 5개의 root DNS가 웜으로 DDoS공격당하여 전세계 DNS가 마비되어서 개선안으로 Anycast 기술을 사용하게 되었음
+- Anycast IP를 이용하여 DNS를 적절히 분산구성하여 한쪽 지역이 무너지더라도 다른 지역에서 서비스를 받을 수 있도록 하였음
+### Google public DNS
+- 가장 좋은 예제로는 우리가 잘 알고 있는 Google public DNS의 IP 8.8.8.8 도 Anycast로 구성되어있으며 전세계 국가에 분산 되어있고 그 규모는 엄청남
+- Google public DNS를 쓰면 자신이 속한 지역에서 라우팅 경로가 가장 최적인 지역의 DNS 서비스를 받고 Google 서비스에 대한 서비스도 최적에 있는 지역에 서버에 서비스 받음
+- 아시아에선 대만과 홍콩에 있음
+- https://developers.google.com/speed/public-dns/faq#locations
+### Managing Zone and records
+- Offers a complete set of functions for zone management
+  - Create and manage zones and records
+  - Import/upload zone files
+  - Filter and sort views of zones and records
+  - Secondary DNS support
+  - **APIs and SDKs**
+- DNS Zones hold the trusted DNS records that will reside on Oracle Cloud Infrastructure's nameservers
+- You can create **public zones** with publicly available domain names or **private zones** to define your own domain name for private address resolution
+#### DNS Zone Record의 종류
+- A (Address Mapping) Record
+  - 레코드 A는 주어진 호스트에 대한 IP 주소 (IPv4)를 알려줌
+  - 도메인 이름을 해당하는 IP 주소로 변환하는 데 사용
+- AAAA (IP Version 6 Address records)  
+  - 레코드 AAAA (quad-A 레코드이기도 함)는 주어진 호스트에 대해 IPv6 주소를 알려줌
+  - 결국 A 레코드와 같은 방식으로 작동하며 차이점은 IP 주소 유형입니다.(IPv6)
+- CNAME (Canonical Name) 
+  - CNAME 레코드는 도메인 이름의 별칭을 만드는 데 사용
+  - CNAME 레코드는 도메인을 외부 도메인으로 별칭을 지정하려는 경우 유용
+  - 경우에 따라 CNAME 레코드를 제거하고 A 레코드로 대체하면 성능 오버 헤드를 줄일 수도 있음
+- HINFO (Host Information) 
+  - HINFO 레코드는 호스트에 대한 일반 정보를 얻는 데 사용
+  - CPU 및 OS 유형을 알려줌
+  - HINFO 레코드 데이터는 두 호스트가 통신하기를 원할 때 운영 체제 특정 프로토콜을 사용할 수있는 가능성을 제공
+  - 하지만, 일반적으로 보안상의 이유 때문에 HINFO 레코드는 공용 서버에서 사용되지 않음
+- ISDN (Integrated Services Digital Network) 
+  - ISDN 리소스 레코드는 호스트의 ISDN 주소를 알려줌 
+  - ISDN 주소는 국가 코드, 국가 별 대상 코드, ISDN 가입자 번호 및 선택적으로 ISDN 하위 주소로 구성된 전화 번호
+  - 레코드의 기능은 A 레코드 기능의 변형 일뿐임
+- MX (Mail exchanger)
+  - MX 레코드는 DNS 도메인 이름에 대한 메일 교환 서버를 알려줌
+  - 이 정보는 SMTP (Simple Mail Transfer Protocol)가 전자 메일을 적절한 호스트로 라우팅하는 데 사용
+  - 일반적으로 DNS 도메인에 대해 둘 이상의 메일 교환 서버가 있으며 각 도메인에 우선 순위가 설정
+- NS (Name Server) 
+  - NS 레코드는 주어진 호스트에 대한 공식적인 Name Server를 알려줌
+  - DNS Server를 지정하는 Record
+- PTR (Reverse-lookup Pointer records)
+  - 정방향 DNS 확인 (A 및 AAAA 레코드)과 달리 PTR 레코드는 IP 주소를 기반으로 도메인 이름을 찾는 데 사용
+- SOA (Start of Authority)
+  - 기본 이름 서버, 도메인 관리자의 전자 메일, 도메인 일련 번호 및 영역 새로 고침과 관련된 여러 타이머를 포함하여 DNS 영역에 대한 핵심 정보를 지정
+- MX (Mail eXchanger) 레코드
+  - 메일서버의 연동시 메일의 소유를 확인하는 레코드로 쓰임
+- SPF (Sender Policy Framework) 레코드
+  - 레코드 TXT 레코드에 안에서 사용되며, 메일 스푸핑을 방지하는데 사용되는 레코드
+  - 특정 사업체(네이버, 다음, 구글)의 메일을 보냈을때 반송이 안되는 경우가 있음
+    - 이때, 대부분 SPF 등록이 안되는 경우에 발생  
+#### 실습
+- Step 01. OCI 접속 > Networking > DNS Management > Zones  
+- Step 02. ``demo_oke`` compartment 선택
+- Step 03. 상세 내용 설정
+  - Method: Manual or Import
+  - Zone Name: A domain name identifies a particular space within a zone for the purposes of naming systems and/or associating DNS records
+  - Create in compartment: Compartment 선택
+  - ZONE Type: Primary or Secondary
+    - Primary DNS: referes to the DNS provider with control of zone file modification
+    - Secondary DNS servers: have a read-only copy of the zone that stays in sync with the master of primary DNS Server
+- Step 04. Create
+![CreateDNSZone](./images/CreateDNSZone.png)
+- Step 05. Created Zone Information: 자동으로 4개의 NS Record와 1개의 SOA Record가 생성되어 짐
+![CreatedDNSZone.png](./images/CreatedDNSZone.png)
+- Step 06. Create Address Mapping Record: **oke cluster의 ingress controller의 loadbalancer service server의 IP 등록**
+![OKE_LoadBalancer_A_Record](./images/OKE_LoadBalancer_A_Record.png)
+- Step 07. ``Publish Changes`` 버튼을 클릭해서 반영 완료
+![DNS_Record_List](./images/DNS_Record_List.png)
+- Step 08. 24시간이 지난 후, ``gusami.smartwork.com``에 접속해 보기
