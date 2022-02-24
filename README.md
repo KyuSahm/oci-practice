@@ -1361,7 +1361,11 @@ job.batch/ingress-nginx-admission-patch    1/1           7s         117m
 - SPF (Sender Policy Framework) 레코드
   - 레코드 TXT 레코드에 안에서 사용되며, 메일 스푸핑을 방지하는데 사용되는 레코드
   - 특정 사업체(네이버, 다음, 구글)의 메일을 보냈을때 반송이 안되는 경우가 있음
-    - 이때, 대부분 SPF 등록이 안되는 경우에 발생  
+    - 이때, 대부분 SPF 등록이 안되는 경우에 발생
+#### 실습 전 준비 사항
+- hosting.kr에서 회원 가입 후, 가장 싼 도메인을 구입
+![Buy_Domain_With_gmail_id](./images/Buy_Domain_With_gmail_id.png)
+- 구입한 Domain: ``nuriflex.xyz``
 #### 실습
 - Step 01. OCI 접속 > Networking > DNS Management > Zones  
 - Step 02. ``demo_oke`` compartment 선택
@@ -1380,4 +1384,6 @@ job.batch/ingress-nginx-admission-patch    1/1           7s         117m
 ![OKE_LoadBalancer_A_Record](./images/OKE_LoadBalancer_A_Record.png)
 - Step 07. ``Publish Changes`` 버튼을 클릭해서 반영 완료
 ![DNS_Record_List](./images/DNS_Record_List.png)
-- Step 08. 24시간이 지난 후, ``gusami.smartwork.com``에 접속해 보기
+- Step 08. hosting.kr에서 구입한 Domain에 대한 Name Server를 oci NS server들을 등록
+![RegisterDNSServer](./images/RegisterDNSServer.png)
+- Step 09. 24시간이 지난 후, ``www.nuriflex.xyz``에 접속해 보기
